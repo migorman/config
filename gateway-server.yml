@@ -8,15 +8,27 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:8070/eureka/
+      defaultZone: http://eurekaserver:8070/eureka/
       
  
 spring:
   cloud:
+    loadbalancer.ribbon.enabled: false
     gateway:
-      discovery.locator:
-        enabled: true
-        lowerCaseServiceId: true
+        routes:
+        - id: organization-service
+          uri: lb://organization-service
+          predicates:
+          - Path=/organization/**
+          filters:
+          - RewritePath=/organization/(?<path>.*), /$\{path}
+        - id: licensing-service
+          uri: lb://licensing-service
+          predicates:
+          - Path=/license/**
+          filters:
+          - RewritePath=/license/(?<path>.*), /$\{path}
+
 
        
 management:
@@ -24,4 +36,4 @@ management:
     web:
       exposure:
         include: "*"
-      
+        
